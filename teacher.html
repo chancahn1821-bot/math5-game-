@@ -139,7 +139,7 @@ button:disabled{opacity:.5;cursor:default}
 
       <section class="panel" style="display:flex;flex-direction:column;gap:10px">
         <h2>수업 시작 전 초기화</h2>
-        <p class="muted">이전 수업의 기록과 보낸 힌트를 지우고 모든 조를 ‘시작 전’으로 돌려요. 구글 시트의 기록도 함께 지워져요.</p>
+        <p class="muted">이전 수업의 기록과 보낸 힌트를 지우고 모든 조를 ‘시작 전’으로 돌려요. 페이지를 열어 둔 학생 화면도 10초 안에 처음 화면으로 돌아가고, 조를 다시 고르게 돼요.</p>
         <div class="bar"><button type="button" class="ghost" id="reset">기록 초기화</button><span id="resetMsg" class="muted"></span></div>
       </section>
     </div>
@@ -225,7 +225,7 @@ document.getElementById("reset").onclick=function(){
   if(!armed){armed=true;b.textContent="한 번 더 누르면 초기화";m.textContent="모든 조의 기록이 지워져요.";setTimeout(function(){armed=false;b.textContent="기록 초기화";},4000);return;}
   armed=false;b.textContent="기록 초기화";m.textContent="초기화 중…";
   fetch(URL_,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"reset",key:CODE})})
-    .then(function(r){return r.json();}).then(function(j){m.textContent=j&&j.ok?"초기화했어요.":"초기화하지 못했어요: "+((j&&j.error)||"");load();})
+    .then(function(r){return r.json();}).then(function(j){m.textContent=j&&j.ok?"초기화했어요. 학생 화면도 10초 안에 처음으로 돌아가요.":"초기화하지 못했어요: "+((j&&j.error)||"");load();})
     .catch(function(){m.textContent="초기화하지 못했어요. 연결을 확인하세요.";});
 };
 /* ---- 조별 힌트 보내기 ---- */

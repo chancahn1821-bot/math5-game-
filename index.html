@@ -250,6 +250,14 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
     <button type="button" class="ghost" id="hlClose">닫기</button>
   </div>
 </div>
+<div class="hpop" id="resetPop" hidden role="alertdialog" aria-modal="true" aria-labelledby="rpTitle">
+  <div class="hpbox" style="border-color:var(--pen)">
+    <span class="hpicon" aria-hidden="true">🔄</span>
+    <h2 id="rpTitle">선생님이 게임을 초기화했어요</h2>
+    <p class="hptext" style="background:var(--pen-soft);color:var(--ink);text-align:center">처음부터 다시 시작해요. 조 대표 학생은 자기 조 버튼을 다시 눌러 주세요.</p>
+    <button type="button" id="rpOk">확인</button>
+  </div>
+</div>
 <script>
 (function(){
 var TEACHER_PIN="mathchan";
@@ -546,13 +554,13 @@ function sendNow(force){
   if(!team)return;
   var url=(window.SCRIPT_URL||"").trim();
   if(!url){setSync("교사용 주소가 아직 설정되지 않았어요 (config.js)","bad");return;}
-  var info=progressInfo(); var payload={action:"report",team:team,solved:st.solved,current:info.current,moving:info.moving,done:info.done,status:info.status,place:info.place,target:info.target,penalty:penalty()};
+  var info=progressInfo(); var payload={action:"report",team:team,solved:st.solved,current:info.current,moving:info.moving,done:info.done,status:info.status,place:info.place,target:info.target,penalty:penalty(),epoch:myEpoch};
   var sig=JSON.stringify(payload); if(!force&&sig===lastSent)return; lastSent=sig;
   setSync("전송 중…","");
   var body=JSON.stringify(payload);
   fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body})
     .then(function(r){return r.json();})
-    .then(function(j){if(j&&j.ok)setSync("선생님께 전송됨 · "+new Date().toTimeString().slice(0,5),"ok");else setSync("전송 실패: "+((j&&j.error)||"알 수 없음"),"bad");})
+    .then(function(j){if(j&&j.reset){checkEpoch(j.epoch);return;}if(j&&j.ok)setSync("선생님께 전송됨 · "+new Date().toTimeString().slice(0,5),"ok");else setSync("전송 실패: "+((j&&j.error)||"알 수 없음"),"bad");})
     .catch(function(){
       fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body})
         .then(function(){setSync("선생님께 전송함 · "+new Date().toTimeString().slice(0,5),"ok");})
@@ -696,10 +704,28 @@ var HINT_LS="coord-hints-seen";
 var hintSeen={}; try{hintSeen=JSON.parse(localStorage.getItem(HINT_LS)||"{}")||{};}catch(e){}
 var gotHints=[], hintQueue=[], hintShowing=null;
 function saveSeen(){try{localStorage.setItem(HINT_LS,JSON.stringify(hintSeen));}catch(e){}}
+var EPOCH_LS="coord-epoch";
+var myEpoch=""; try{myEpoch=localStorage.getItem(EPOCH_LS)||"";}catch(e){}
+function checkEpoch(ep){
+  if(!ep)return; ep=String(ep);
+  if(!myEpoch){myEpoch=ep;try{localStorage.setItem(EPOCH_LS,ep);}catch(e){}return;}
+  if(ep!==myEpoch){myEpoch=ep;try{localStorage.setItem(EPOCH_LS,ep);}catch(e){}remoteReset();}
+}
+function remoteReset(){
+  hintSeen={};saveSeen();gotHints=[];hintQueue=[];hintShowing=null;
+  document.getElementById("hintPop").hidden=true;document.getElementById("hintList").hidden=true;
+  team=null;try{localStorage.removeItem(TEAM_LS);}catch(e){}lastSent="";
+  restart();renderTeam();updHintBtn();
+  document.getElementById("resetPop").hidden=false;document.getElementById("rpOk").focus();
+}
 function pollHints(){
-  var url=(window.SCRIPT_URL||"").trim(); if(!team||!url)return;
-  fetch(url+(url.indexOf("?")<0?"?":"&")+"action=hints&team="+team+"&t="+Date.now()).then(function(r){return r.json();}).then(function(j){
-    if(!j||!j.ok)return; gotHints=j.hints||[]; updHintBtn();
+  var url=(window.SCRIPT_URL||"").trim(); if(!url)return;
+  var q=team?"action=hints&team="+team:"action=epoch";
+  fetch(url+(url.indexOf("?")<0?"?":"&")+q+"&t="+Date.now()).then(function(r){return r.json();}).then(function(j){
+    if(!j||!j.ok)return;
+    var before=myEpoch; checkEpoch(j.epoch); if(before&&before!==myEpoch)return;
+    if(!team||!j.hints)return;
+    gotHints=j.hints||[]; updHintBtn();
     gotHints.forEach(function(h){var key=team+":"+h.id;
       if(h.acked.indexOf(team)<0&&!hintSeen[key]&&hintQueue.indexOf(h)<0&&(!hintShowing||hintShowing.id!==h.id))hintQueue.push(h);});
     showNextHint();
@@ -731,6 +757,7 @@ function openHintList(){
   document.getElementById("hintList").hidden=false;
 }
 document.getElementById("hpOk").onclick=ackHint;
+document.getElementById("rpOk").onclick=function(){document.getElementById("resetPop").hidden=true;window.scrollTo({top:0});};
 document.getElementById("hintBtn").onclick=openHintList;
 document.getElementById("hlClose").onclick=function(){document.getElementById("hintList").hidden=true;};
 setInterval(pollHints,8000);
