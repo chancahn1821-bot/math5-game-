@@ -178,6 +178,9 @@ button.danger:not(.ghost){background:var(--bad);color:var(--card)}
   .side{position:static;max-height:none;overflow:visible;padding:0}
   .side .log{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 }
+.maphead{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.mapchips{gap:5px}
+.mapchips .chip{font-size:12px;padding:2px 9px;background:var(--pen-soft);border-color:transparent}
 details.teacher{font-size:14px}
 details.teacher summary{cursor:pointer;color:var(--muted)}
 details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:10px}
@@ -196,18 +199,17 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
   <span class="eyebrow">고2 기하 · 교내 방탈출 · 10문제</span>
   <h1>좌표 탈출: 정문에서 후문까지</h1>
   <p class="muted">답을 맞혀야 다음 문제가 열려요. 출구 문제(주황 테두리)를 풀면 다음 장소의 좌표가 나오고, 그곳에 다음 봉투가 있어요.</p>
-  <div class="chips">
+</header>
+<div class="split">
+<aside class="side" aria-label="지도와 이동 기록">
+<section class="stage">
+  <div class="maphead"><h2>학교 지도</h2><div class="chips mapchips">
     <span class="chip">원점 = 정문, 정문 <b>(0, 0, 1)</b></span>
     <span class="chip">1칸 = <b>4 m</b> (20 m = 5칸)</span>
     <span class="chip">1층·지면 <b>z = 1</b></span>
     <span class="chip">구름다리 <b>z = 3</b></span>
     <span class="chip">본관 5층, 옥상 <b>z = 6</b></span>
-  </div>
-</header>
-<div class="split">
-<aside class="side" aria-label="지도와 이동 기록">
-<section class="stage">
-  <h2>학교 지도</h2>
+  </div></div>
   <div class="panel">
     <div class="map">
       <img src="map.jpg" alt="학교 배치도: 북쪽에 학교 앞 도로와 정문·후문, 서쪽에 45도 기울어진 본관과 중정·구름다리, 가운데 체육관, 동쪽에 주차장과 운동장" width="1438" height="1094">
