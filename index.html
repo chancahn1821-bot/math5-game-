@@ -147,6 +147,37 @@ button.danger:not(.ghost){background:var(--bad);color:var(--card)}
 .hllist .tm{font-family:var(--mono);color:var(--muted);font-size:13px}
 @keyframes hpin{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.hpbox{animation:none}}
+/* 2분할: 왼쪽(지도·이동 기록·자물쇠) 고정, 오른쪽(문제) 스크롤 */
+.wrap.app{max-width:1480px;gap:16px}
+.app header{gap:8px}
+.app header h1{font-size:clamp(22px,2.6vw,30px)}
+.app header .muted{font-size:14px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);max-height:calc(100vh - 20px);overflow:auto;display:flex;flex-direction:column;gap:14px;padding:2px 4px 8px 0;overscroll-behavior:contain}
+.side .stage{gap:8px}
+.side h2{font-size:17px}
+.side .panel{padding:10px}
+.side .maptools{font-size:12px;margin-top:6px}
+.side .maptools .muted{display:none}
+.side .map{width:fit-content;max-width:100%;margin:0 auto}
+.side .map img{width:auto;max-width:100%;max-height:calc(100vh - 360px);min-height:220px;object-fit:contain}
+.side .log{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.side .log div{padding:6px 8px;font-size:12px}
+.side .log b{font-size:13px}
+.side .lockrow span{width:36px;height:42px;font-size:20px}
+.main{display:flex;flex-direction:column;gap:22px;min-width:0}
+.main .status{top:env(safe-area-inset-top,0px)}
+.main{container-type:inline-size}
+@container (max-width:660px){.work{grid-template-columns:1fr}.kpwrap{width:100%}.kp button{height:42px}}
+@media (min-width:901px) and (max-width:1320px){.main .work{grid-template-columns:1fr}.main .kpwrap{width:100%}}
+@media (max-width:900px){
+  .side .map{width:auto}
+  .side .map img{width:100%;max-height:none;min-height:0}
+  .side .maptools .muted{display:inline}
+  .split{grid-template-columns:1fr}
+  .side{position:static;max-height:none;overflow:visible;padding:0}
+  .side .log{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
 details.teacher{font-size:14px}
 details.teacher summary{cursor:pointer;color:var(--muted)}
 details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:10px}
@@ -160,7 +191,7 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
 </head>
 <body>
 
-<div class="wrap">
+<div class="wrap app">
 <header>
   <span class="eyebrow">고2 기하 · 교내 방탈출 · 10문제</span>
   <h1>좌표 탈출: 정문에서 후문까지</h1>
@@ -173,23 +204,8 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
     <span class="chip">본관 5층, 옥상 <b>z = 6</b></span>
   </div>
 </header>
-
-<section class="panel teampanel" id="teamPanel">
-  <h2>우리 조 선택</h2>
-  <p class="muted">조 대표 학생만 자기 조 버튼을 눌러 주세요. 문제를 풀 때마다 진행 상황이 선생님 화면에 전송돼요. 대표가 아니면 ‘개인 풀이’를 고르세요.</p>
-  <div class="teambtns" id="teamBtns"></div>
-  <p class="sync" id="syncTxt"></p>
-</section>
-
-<div class="status" aria-live="polite">
-  <span>진행 <b id="progTxt">0 / 10</b></span>
-  <span class="teamchip" id="teamChip">조 선택 전</span>
-  <span class="bar"><i id="progBar"></i></span>
-  <span class="penchip" id="penChip" hidden></span>
-  <button type="button" class="hintbtn" id="hintBtn" hidden>받은 힌트 0</button>
-  <button type="button" class="ghost sm" id="restartBtn">다시 풀기</button>
-</div>
-
+<div class="split">
+<aside class="side" aria-label="지도와 이동 기록">
 <section class="stage">
   <h2>학교 지도</h2>
   <div class="panel">
@@ -203,15 +219,28 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
     </div>
   </div>
 </section>
-
 <section class="stage">
   <h2>이동 기록과 자물쇠</h2>
   <div class="log" id="log"></div>
   <div class="lockrow" id="lockrow" aria-label="자물쇠 숫자"></div>
 </section>
-
+</aside>
+<main class="main">
+<div class="status" aria-live="polite">
+  <span>진행 <b id="progTxt">0 / 10</b></span>
+  <span class="teamchip" id="teamChip">조 선택 전</span>
+  <span class="bar"><i id="progBar"></i></span>
+  <span class="penchip" id="penChip" hidden></span>
+  <button type="button" class="hintbtn" id="hintBtn" hidden>받은 힌트 0</button>
+  <button type="button" class="ghost sm" id="restartBtn">다시 풀기</button>
+</div>
+<section class="panel teampanel" id="teamPanel">
+  <h2>우리 조 선택</h2>
+  <p class="muted">조 대표 학생만 자기 조 버튼을 눌러 주세요. 문제를 풀 때마다 진행 상황이 선생님 화면에 전송돼요. 대표가 아니면 ‘개인 풀이’를 고르세요.</p>
+  <div class="teambtns" id="teamBtns"></div>
+  <p class="sync" id="syncTxt"></p>
+</section>
 <div id="stages" class="stage" style="gap:28px"></div>
-
 <details class="teacher panel">
   <summary>교사용</summary>
   <div class="tbody">
@@ -231,6 +260,9 @@ details.teacher .tbody{display:flex;flex-direction:column;gap:10px;padding-top:1
     </div>
   </div>
 </details>
+</main>
+</div>
+
 </div>
 
 
@@ -346,20 +378,20 @@ var Q=[
   after:"다음 장소: F(32, −22, 1) 운동장 중심으로 가세요.",
   digit:5, move:{name:"N → F",v:"(27, −5, 0)"}, place:"F"},
  {stage:3,title:"타원 트랙",
-  html:'운동장 중심 F를 원점으로 하는 평면좌표 <span class="c">X = x − 32</span>, <span class="c">Y = y + 22</span>를 잡자. 이 좌표에서 남북(Y축) 길이 20칸, 동서(X축) 길이 12칸인 타원 트랙의 방정식은 <span class="c">X²/6² + Y²/10² = 1</span>이다.<br>① 이 타원의 초점 중 하나가 <span class="c">(0, c)</span> <span class="c">(c &gt; 0)</span>일 때, c의 값을 구하라.<br>② 북쪽 초점 F₁의 실제 좌표 <span class="c">(x, y, z)</span>를 구하라.',
-  fields:[{t:"num",k:"c",label:"c (초점 (0, c), c > 0)"},{t:"vec",k:"f",label:"F₁ = ("}],
+  html:'운동장 중심 F를 원점으로 하는 평면좌표 <span class="c">X = x − 32</span>, <span class="c">Y = y + 22</span>를 잡자. 이 좌표에서 남북(Y축) 길이 20칸, 동서(X축) 길이 12칸인 타원 트랙의 방정식은 <span class="c">X²/6² + Y²/10² = 1</span>이다.<br>① 이 타원의 초점 중 하나가 <span class="c">(0, c)</span> <span class="c">(c &gt; 0)</span>일 때, c의 값을 구하라.<br>② 북쪽 초점 F₁에 공이 하나 놓여 있다. 공은 지면 위에 있다고 할 때, 이 공의 실제 좌표 <span class="c">(x, y, z)</span>를 구하라.',
+  fields:[{t:"num",k:"c",label:"c (초점 (0, c), c > 0)"},{t:"vec",k:"f",label:"공의 좌표 = ("}],
   check:function(v){return near(num(v.c),8,0.01)&&vec(v,"f",[32,-14,1]);},
-  hint:"장축이 Y축(남북) 방향이라 초점이 Y축 위에 있어요. c² = 10² − 6². 실제 좌표는 x = X + 32, y = Y − 22, 그리고 지면이라 z = 1이에요.",
-  ans:"X²/36 + Y²/100 = 1, c = 8, F₁(32, −14, 1), F₂(32, −30, 1)",
+  hint:"장축이 Y축(남북) 방향이라 초점이 Y축 위에 있어요. c² = 10² − 6². 공의 실제 좌표는 x = X + 32, y = Y − 22이고, 공이 지면 위에 있으니 z = 1이에요.",
+  ans:"X²/36 + Y²/100 = 1, c = 8, 공(북쪽 초점 F₁)의 좌표 (32, −14, 1). 남쪽 초점 F₂는 (32, −30, 1)",
   after:"마지막 자물쇠 숫자를 얻었어요.", digit:8, place:"F12"},
  {stage:3,exit:true,title:"출구: 호루라기 쌍곡선",
-  html:'<b>7번에서 구한 타원 트랙의 두 초점</b> <span class="c">F₁(32, −14, 1)</span>, <span class="c">F₂(32, −30, 1)</span>에서 동시에 호루라기를 분다. 두 초점 F₁, F₂까지의 거리의 차가 12.8칸으로 일정한 점들은 쌍곡선을 이룬다. 7번과 같은 XY 좌표로 이 쌍곡선의 방정식을 세우고, 이 쌍곡선과 <b>7번의 타원 트랙</b>이 만나는 네 점 중 북동쪽 점 X의 실제 좌표 <span class="c">(x, y, z)</span>를 구하라.',
-  fields:[{t:"vec",k:"x",label:"X = ("}],
-  check:function(v){return vec(v,"x",[35.6,-14,1],0.05);},
-  hint:"2a = 12.8, c = 8 이므로 b² = 64 − 40.96. 타원과 쌍곡선 식을 X², Y²에 대한 연립방정식으로 푸세요.",
-  ans:"Y²/40.96 − X²/23.04 = 1, 교점 (X, Y) = (3.6, 8) → X(35.6, −14, 1)",
-  after:"다음 장소: X(35.6, −14, 1). 그곳의 카드에 적힌 대로 (−3.6, 10, 0)만큼 이동해 주차장 P(32, −4, 1)로 가세요.",
-  move:[{name:"F → X",v:"(3.6, 8, 0)"},{name:"X → P",v:"(−3.6, 10, 0)"}], place:"XP"},
+  html:'<b>7번에서 구한 타원 트랙의 두 초점</b> <span class="c">F₁(32, −14, 1)</span>, <span class="c">F₂(32, −30, 1)</span>에서 동시에 호루라기를 분다. 두 초점까지의 거리의 차가 <b>12칸</b>으로 일정한 점들은 쌍곡선을 이룬다. 7번과 같은 XY 좌표(운동장 중심이 원점)에서 이 쌍곡선의 방정식을 <span class="c">Y²/a² − X²/b² = 1</span>이라 하자.<br>① b²의 값을 구하라.<br>② 이 쌍곡선의 두 꼭짓점 중 <b>북쪽 꼭짓점</b> X의 실제 좌표 <span class="c">(x, y, z)</span>를 구하라. (지면 위의 점)',
+  fields:[{t:"num",k:"b",label:"① b²"},{t:"vec",k:"x",label:"② X = ("}],
+  check:function(v){return near(num(v.b),28,0.01)&&vec(v,"x",[32,-16,1]);},
+  hint:"거리의 차 = 2a 이므로 a = 6, 초점이 (0, ±8)이라 c = 8. 쌍곡선은 c² = a² + b² 이에요. 꼭짓점은 (0, ±a)이고, 실제 좌표는 x = X + 32, y = Y − 22, z = 1이에요.",
+  ans:"a = 6, c = 8 → b² = 64 − 36 = 28, 쌍곡선 Y²/36 − X²/28 = 1. 북쪽 꼭짓점 (X, Y) = (0, 6) → X(32, −16, 1)",
+  after:"다음 장소: 주차장 P(32, −4, 1). 꼭짓점 X에서 북쪽으로 12칸(48 m) 가면 돼요.",
+  move:[{name:"F → X",v:"(0, 6, 0)"},{name:"X → P",v:"(0, 12, 0)"}], place:"XP"},
  {stage:4,exit:true,title:"출구: 스피커 소리의 경계",
   html:'체육관 지붕(z = 4)의 스피커 <span class="c">K(21, −6, 4)</span> 소리는 K를 중심으로 하고 반지름이 9칸인 구 안에서만 들린다.<br>① 정문 <span class="c">G(0, 0, 1)</span>과 후문 <span class="c">H(27, 0, 1)</span>의 좌표를 각각 이 구의 방정식의 좌변에 대입한 값을 구하라.<br>② 정문과 후문 중 구 위에 있는 문을 골라라.',
   fields:[{t:"num",k:"pg",label:"① 정문 대입값"},{t:"num",k:"ph",label:"① 후문 대입값"},{t:"sel",k:"g",label:"② 구 위의 문",opts:["선택","정문","후문"]}],
@@ -376,7 +408,7 @@ var Q=[
   after:""}
 ];
 
-var PLACES={G:[0,0],E:[8,-8],M:[5,-17],N:[5,-17],F:[32,-22],F1:[32,-14],F2:[32,-30],X:[35.6,-14],P:[32,-4],H:[27,0]};
+var PLACES={G:[0,0],E:[8,-8],M:[5,-17],N:[5,-17],F:[32,-22],F1:[32,-14],F2:[32,-30],X:[32,-16],P:[32,-4],H:[27,0]};
 var LS="coord-escape-v2";
 var st={solved:0,start:Date.now(),hints:0,hintSeen:{},teacher:false,showAns:false,end:null,arrived:{},skipped:{}};
 try{var saved=JSON.parse(localStorage.getItem(LS)||"null");if(saved&&typeof saved.solved==="number"){st=Object.assign(st,saved);st.teacher=false;st.showAns=false;}}catch(e){}
